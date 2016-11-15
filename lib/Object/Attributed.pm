@@ -29,7 +29,7 @@ The module aims to stay with the spirit of the simplistic Perl's built-in class 
 No fancy features like roles are planned. It also doesn't introduce new keywords like 'has' either, something
 I personally never liked. You don't have to change much about your classes if you want to switch to use the features of
 this library. All general remarks about Perl's OOP model apply to classes produced with help of Object::Attributed.
-Many probably will pass by after reading this, but personally I'm really found of that.
+Many probably will pass by after reading this, but personally I'm really fond of that.
 
 =head1 SYNOPSIS
 
@@ -37,10 +37,13 @@ Many probably will pass by after reading this, but personally I'm really found o
 	# use clause here.
 	use parent 'Object::Attributed'; #no imports available.
 
-	sub name : Prop([read,write,setter],value=>'Joe') # 'sub' is important, see below; read-write property named 'name'.
-	# 'setter' means the code of the sub is taken as the setter. No getter is specified, so implicit one is used.
-	# 'Joe' is the default value for name.
+	sub name : Prop([read,write,setter],value=>'Joe') # 'sub' is important, see below;
+	# this declares a read-write property named 'name'.
+	# 'setter' means the code of the sub that follows as in a regular subroutine after
+	# is taken as the setter. No getter is specified, so implicit one is used.
+	# 'Joe' is the default value for the property.
 	{
+		# the setter body here.
 		my $self=shift;
 		my ($value)=@_;
 		croak 'Invalid name.' unless $value && $value=~/[\w\s]+/;
@@ -110,7 +113,7 @@ PARAMETERS below.
 
 =back
 
-PARAMETERS are given inline as key-value pairs (C<key=>value,...>). Internally they will be slurped into
+PARAMETERS are given inline as key-value pairs (C<< key=>value,... >>). Internally they will be slurped into
 one hash. Supported parameters are
 
 =over
@@ -148,7 +151,7 @@ reading and writing to the property! Takes the same format of input as the previ
 Specifies the default value for the property as a valid Perl expression. Optional. If set and is
 not undef, all newly created objects will get a I<copy> of the value via Clone::clone. As such, it means complex
 data like objects might not be copied properly; using it might also mean double initialization if later your constructor
-decides to assign it a new value. See "USING MEMBER INITIALIZATION" for a better way to initialize members of your classes.
+decides to assign it a new value. See "USING MEMBER INITIALIZATION" below for a better way to initialize members of your classes.
 
 The expression is evaluated only once, at processing of the property declaration. The returned value is copied later.
 
@@ -162,7 +165,7 @@ the them dynamically in the constructor nor to trigger write accessors. For othe
 	sub create : Init(name($_[1] || 'Joe'))
 	sub create : Init(name=$_[1] || 'Joe')
 
-First form will invoke C<$obj->name($_[1] || 'Joe')>. The second C<<$obj->{name}=$_[1] || 'Joe'>>. So the
+First form will invoke C<< $obj->name($_[1] || 'Joe') >>. The second C<< $obj->{name}=$_[1] || 'Joe' >>. So the
 first form is suitable if you need to run the corresponding write accessor, while the second will directly update
 the key in the object's hash with provided value. Here 'name' is taken from the previous example. It can be any
 method name of the object that handles the initialization, in the first form that is. It just happens that
@@ -199,7 +202,7 @@ The (only) constructor for an object is the class' C<create> method, called from
 
 Note that for each property declaration there will be three new subroutines defined for the calling package. The first one was
 just talked straight above; it's not new in the sense it will just occupy the place of the subroutine. Two others
-will get names "get_$prop" and "set_$prop". So calling, for example, a name property of an object in any mode invokes C<<>$obj->name>>
+will get names "get_$prop" and "set_$prop". So calling, for example, a name property of an object in any mode invokes C<< $obj->name >>
 and that checks what accessor to call. You can foil read-write checks by calling the "get_$prop" or "set_$prop" methods directly.
 Unless the class actually provides a non-implicit accessor for disabled access modes, this is probably not very useful.
 
