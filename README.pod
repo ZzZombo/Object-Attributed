@@ -223,6 +223,16 @@ only on subroutines, with the reasoning behind that being that Object::Attribute
 of the attributes into another, coming from the module. So the C<sub> keyword serves as a reminder to the programmer that
 after Object::Attributed processes the attribute will still be a subroutine, albeit a different one.
 
+=head1 LIMITATIONS
+
+=over
+
+=item *
+
+Lexical scoped variables or actually, anything, aren't visible in all expressions taken as input.
+
+=back
+
 =head1 ISSUES AND CONTACTS
 
 For all issues you are welcome to use the Github bug tracking system. I can always be contacted there as well.
