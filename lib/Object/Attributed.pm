@@ -11,7 +11,7 @@ use Class::ISA ();
 use Package::Stash ();
 use B ();
 
-our $VERSION=1.0;
+our $VERSION=1.01;
 
 BEGIN
 {
@@ -39,7 +39,7 @@ INIT
 my $defaults;
 #my $safe=Safe->new;
 
-sub find_method_tentative
+my $find_method_tentative=sub
 {
 	my ($class,$method)=@_;
 	my @parents=Class::ISA::super_path($class);
@@ -52,7 +52,8 @@ sub find_method_tentative
 		}
 	}
 	undef;
-}
+};
+
 our %init_lists=('Object::Attributed'=>{create=>{list=>[]}});
 
 sub Init: ATTR(CODE,RAWDATA)
@@ -123,10 +124,12 @@ sub Init: ATTR(CODE,RAWDATA)
 		}
 		@_=@copy;
 		goto &$code;
-	} if $first_time;#unless $cv->GV->STASH->NAME eq 'Object::Attributed';
+	} if $first_time;
 }
 
-package Object::Attributed::implicit_handlers; #hide this from being inherited by subclasses.
+package Object::Attributed::implicit_handlers;
+# hide this from being inherited by subclasses and also allows to check the package later
+# to supply these two access handlers with the property name they are dealing with.
 sub getter
 {
 	return $_[0]->{$_[1]};
@@ -235,7 +238,6 @@ sub Prop: ATTR(CODE,RAWDATA)
 			$stash->add_symbol("&${_}et_$prop",$m,filename=>$filename,first_line_num=>$linenum);
 		}
 		my $cv=B::svref_2object($m);
-#		print "$package->$prop (".ref($m).') '.$cv->GV->NAME.' '.$cv->GV->STASH->NAME."\n";
 		$mod->{name}{"${_}etter"}=1 if $cv->GV->STASH->NAME eq 'Object::Attributed::implicit_handlers';
 	}
 	exists $buf{value} and $defaults->{$package}{$prop}=$buf{value};
@@ -257,7 +259,7 @@ sub Prop: ATTR(CODE,RAWDATA)
 #		print uc($modes[$mode]->{name})." ACCESS $prop in ".ref($self)." (static type $package) ".Dumper(\@_);
 		croak "$prop is $modes[1-$mode]->{name}-only." unless $access->{$modes[$mode]->{name}};
 		my $m="$modes[$mode]->{prefix}et_$prop";
-		my (undef,$handler)=find_method_tentative($package,$m);
+		my (undef,$handler)=$find_method_tentative->($package,$m);
 		croak "Undefined $modes[$mode]->{name} property handler for $prop!" unless defined $handler;
 		splice(@_,1,0,$prop) if $mod->{name}{"$modes[$mode]->{prefix}etter"} && !$skip_name;
 		unshift @_,undef if $mod->{handler};
