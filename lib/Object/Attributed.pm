@@ -14,7 +14,7 @@ use Class::ISA ();
 use Package::Stash ();
 use B ();
 
-our $VERSION=1.01;
+our $VERSION=1.02;
 
 =head1 DESCRIPTION
 
@@ -330,12 +330,11 @@ sub Init: ATTR(CODE,RAWDATA)
 			}
 		}
 	}
-	#my $cv=B::svref_2object(\&$symbol);
 	no warnings 'redefine';
 	*$symbol=sub
 	{
 		my @copy=@_;
-		my $self=$_[0];
+		my $self=shift;
 		goto &$code if $self->{__created};
 		my %ARGS=@_[1..$#_];
 		foreach my $def (@{$init_lists{ref $self}{$ctor}{$package}{list}})
@@ -353,12 +352,13 @@ sub Init: ATTR(CODE,RAWDATA)
 			}
 		}
 		@_=@copy;
+		#*$symbol=$code;
 		goto &$code;
 	} if $first_time;
 }
 
 package Object::Attributed::implicit_handlers;
-# hide this from being inherited by subclasses and also allows to check the package later
+# hides this from being inherited by subclasses and also allows to check the package later
 # to supply these two access handlers with the property name they are dealing with.
 sub getter
 {
